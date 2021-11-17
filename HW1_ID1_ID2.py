@@ -43,12 +43,16 @@ class KnnClassifier:
             Array datatype is guaranteed to be np.float32.
         :return: A 1-dimensional numpy array of m rows. Should be of datatype np.uint8.
         """
+        # get vectorized version of predict single to use on the given array
+        v_predict_single = np.vectorize(self.predict_single)
+        # map the predict_single function onto X to get prediction vector
+        predictions = np.array(v_predict_single(X))
+        return predictions
 
-        # TODO - your code here
+
+
+    def predict_single(self, test_point):
         pass
-
-        ### Example code - don't use this:
-        # return np.random.randint(low=0, high=2, size=len(X), dtype=np.uint8)
 
 
 def main():
