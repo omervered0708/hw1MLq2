@@ -19,6 +19,7 @@ class KnnClassifier:
         self.p = p
         self.training_x = None
         self.training_y = None
+        self.sorted_index_lex = None
         # TODO - Place your student IDs here. Single submitters please use a tuple like so: self.ids = (123456789,)
         self.ids = (213336753, 212362024)
 
@@ -34,7 +35,7 @@ class KnnClassifier:
 
         self.training_x = X
         self.training_y = y
-
+        self.sorted_index_lex = np.argsort(self.training_y)
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
         This method predicts the y labels of a given dataset X, based on a previous training of the model.
@@ -56,17 +57,22 @@ class KnnClassifier:
         :param test_point: the point to predict the label
         :return: predicted label
         """
+        sorted_dist_index, distances = self.sort_index_by_dist(test_point)
+        sorted_indices_both = np.lexsort((self.sorted_index_lex, sorted_dist_index))
+        sorted_labels = self.training_y[sorted_indices_both]
+        k_neighborhood_labels = sorted_labels[:self.k]
 
     def sort_index_by_dist(self, point):
         """
         :param point: a numpy array representing a point in dataset
         :return: an array of indices of training_x sorted by distances from point
         """
-        distances = np.vectorize(lambda x: self.p_norm(point=(point-x)))(self.training_x)
+        distances = np.vectorize(lambda x: self.p_norm(point=(point-x), p=self.p))(self.training_x)
         sort_index = np.argsort(distances)
-        return sort_index
+        return sort_index, distances
 
-    def p_norm(self, point, p):
+    @staticmethod
+    def p_norm(point, p):
         """
         :param point: np.array to calculate p-norm of
         :param p: positive number
