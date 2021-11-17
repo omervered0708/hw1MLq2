@@ -32,10 +32,11 @@ class KnnClassifier:
         :param y: A 1-dimensional numpy array of m rows. it is guaranteed to match X's rows in length (|m_x| == |m_y|).
             Array datatype is guaranteed to be np.uint8.
         """
-
         self.training_x = X
         self.training_y = y
+        # TODO self.sorted_index_lex might be unnecessary
         self.sorted_index_lex = np.argsort(self.training_y)
+
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
         This method predicts the y labels of a given dataset X, based on a previous training of the model.
@@ -51,25 +52,49 @@ class KnnClassifier:
         predictions = np.array(v_predict_single(X))
         return predictions
 
-    def predict_single(self,test_point):
+    def predict_single(self, test_point):
         """
         predicts the label using the classifier for a single point
         :param test_point: the point to predict the label
         :return: predicted label
         """
-        sorted_dist_index, distances = self.sort_index_by_dist(test_point)
-        sorted_indices_both = np.lexsort((self.sorted_index_lex, sorted_dist_index))
+        # get array of distances between the given point and all other points in the training set
+        distances = self.get_distances(test_point)
+        # get sorted indices array - primary sort by distance, secondary sort is lexicographically by label
+        sorted_indices_both = np.lexsort((self.training_y, distances))
+        # get the labels according the sorted indices array
         sorted_labels = self.training_y[sorted_indices_both]
+        # take only first k labels
         k_neighborhood_labels = sorted_labels[:self.k]
+        # get prediction
+        return self.get_winning_label(k_neighborhood_labels)
 
-    def sort_index_by_dist(self, point):
+    def get_distances(self, point):
         """
         :param point: a numpy array representing a point in dataset
         :return: an array of indices of training_x sorted by distances from point
         """
+        # get array containing p-distances between the given point and the points in the training set
         distances = np.vectorize(lambda x: self.p_norm(point=(point-x), p=self.p))(self.training_x)
-        sort_index = np.argsort(distances)
-        return sort_index, distances
+        return distances
+
+    @staticmethod
+    def get_winning_label(k_neighbors_labels):
+        """
+        :param k_neighbors_labels: array with indices corresponding to points from the training set, sorted by distance
+        to a point and secondarily lexicographically sorted by label.
+        :return: predicted label according to the conditions specified (including tiebreaker conditions)
+        """
+        # find most frequent classes
+        classes, counts = np.unique(k_neighbors_labels, return_counts=True)
+        max_count = np.max(counts)
+        frequent_classes = classes[np.where(counts == max_count)]
+        # because the 'k_neighbors_labels' array is sorted with both ascending distances and ascending labels, the first
+        # occurrence of an element labeled as one of the most frequent classes in the k-neighborhood, it also satisfies
+        # all conditions in an event of a tiebreaker.
+        # np.argmax will return the index of the first element in 'k_neighbors_labels' which belongs to one of the
+        # frequent classes.
+        return k_neighbors_labels[np.argmax(np.isin(k_neighbors_labels, frequent_classes))]
 
     @staticmethod
     def p_norm(point, p):
