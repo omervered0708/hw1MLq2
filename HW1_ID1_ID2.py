@@ -17,7 +17,8 @@ class KnnClassifier:
         """
         self.k = k
         self.p = p
-
+        self.training_x = None
+        self.training_y = None
         # TODO - Place your student IDs here. Single submitters please use a tuple like so: self.ids = (123456789,)
         self.ids = (213336753, 212362024)
 
@@ -31,8 +32,8 @@ class KnnClassifier:
             Array datatype is guaranteed to be np.uint8.
         """
 
-        # TODO - your code here
-        pass
+        self.training_x = X
+        self.training_y = y
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -49,11 +50,22 @@ class KnnClassifier:
         predictions = np.array(v_predict_single(X))
         return predictions
 
+    def predict_single(self,test_point):
+        """
+        predicts the label using the classifier for a single point
+        :param test_point: the point to predict the label
+        :return: predicted label
+        """
 
 
-    def predict_single(self, test_point):
-        pass
-
+    def sort_index_by_dist(self, point):
+        """
+        :param point: a numpy array representing a point in dataset
+        :return: an array of indices of training_x sorted by distances from point
+        """
+        distances = np.vectorize(lambda x: np.linalg.norm(point-x,self.p))(self.training_x)
+        sort_index = np.argsort(distances)
+        return sort_index
 
 def main():
 
