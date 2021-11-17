@@ -57,15 +57,24 @@ class KnnClassifier:
         :return: predicted label
         """
 
-
     def sort_index_by_dist(self, point):
         """
         :param point: a numpy array representing a point in dataset
         :return: an array of indices of training_x sorted by distances from point
         """
-        distances = np.vectorize(lambda x: np.linalg.norm(point-x,self.p))(self.training_x)
+        distances = np.vectorize(lambda x: self.p_norm(point=(point-x)))(self.training_x)
         sort_index = np.argsort(distances)
         return sort_index
+
+    def p_norm(self, point, p):
+        """
+        :param point: np.array to calculate p-norm of
+        :param p: positive number
+        :return: p-norm of point ||point||_p
+        """
+        v_abs_p_pow = np.vectorize(lambda x_i: abs(x_i)**p)
+        return (np.sum(v_abs_p_pow(point)))**(1/p)
+
 
 def main():
 
