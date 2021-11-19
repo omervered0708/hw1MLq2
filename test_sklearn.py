@@ -1,8 +1,9 @@
-
 import argparse
 import pandas as pd
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.datasets import load_breast_cancer
+
 
 def main():
     print("*" * 20)
@@ -18,21 +19,37 @@ def main():
     print(f"csv = {args.csv}, k = {args.k}, p = {args.p}")
 
     print("Initiating KnnClassifier")
-    model = KNeighborsClassifier(k=args.k, p=args.p)
+    model = KNeighborsClassifier(n_neighbors=args.k, p=args.p)
     print(f"Loading data from {args.csv}...")
     data = pd.read_csv(args.csv, header=None)
     print(f"Loaded {data.shape[0]} rows and {data.shape[1]} columns")
     X = data[data.columns[:-1]].values.astype(np.float32)
     y = pd.factorize(data[data.columns[-1]])[0].astype(np.uint8)
 
+    # print("Fitting...")
+    # model.fit(X, y)
+    # print("Done")
+    # print("Predicting...")
+    # y_pred = model.predict(X)
+    # print("Done")
+    # accuracy = np.sum(y_pred == y) / len(y)
+    # print(f"Train accuracy: {accuracy * 100 :.2f}%")
+    # print("*" * 20)
+
+    data_x, data_y = load_breast_cancer(return_X_y=True)
+    train_x = data_x[:300, :]
+    train_y = data_y[:300]
+    test_x = data_x[300:, :]
+    test_y = data_y[300:]
     print("Fitting...")
-    model.fit(X, y)
+    model.fit(train_x, train_y)
     print("Done")
     print("Predicting...")
-    y_pred = model.predict(X)
+    y_pred = model.predict(test_x)
+    print(y_pred)
     print("Done")
-    accuracy = np.sum(y_pred == y) / len(y)
-    print(f"Train accuracy: {accuracy * 100 :.2f}%")
+    accuracy = np.sum(y_pred == test_y) / len(test_y)
+    print(f"test accuracy: {accuracy * 100 :.2f}%")
     print("*" * 20)
 
 

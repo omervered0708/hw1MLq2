@@ -5,6 +5,7 @@ import time
 import itertools
 import numpy as np
 import pandas as pd
+from sklearn.datasets import load_breast_cancer
 
 
 class KnnClassifier:
@@ -47,9 +48,9 @@ class KnnClassifier:
         :return: A 1-dimensional numpy array of m rows. Should be of datatype np.uint8.
         """
         # get vectorized version of predict single to use on the given array
-        v_predict_single = np.vectorize(self.predict_single)
+        # v_predict_single = np.vectorize(self.predict_single)
         # map the predict_single function onto X to get prediction vector
-        predictions = np.array(v_predict_single(X))
+        predictions = np.apply_along_axis(self.predict_single, 1, X)
         return predictions
 
     def predict_single(self, test_point):
@@ -60,6 +61,7 @@ class KnnClassifier:
         """
         # get array of distances between the given point and all other points in the training set
         distances = self.get_distances(test_point)
+        dist_ind_sorted = np.argsort(distances)
         # get sorted indices array - primary sort by distance, secondary sort is lexicographically by label
         sorted_indices_both = np.lexsort((self.training_y, distances))
         # get the labels according the sorted indices array
@@ -75,7 +77,7 @@ class KnnClassifier:
         :return: an array of indices of training_x sorted by distances from point
         """
         # get array containing p-distances between the given point and the points in the training set
-        distances = np.vectorize(lambda x: self.p_norm(point=(point-x), p=self.p))(self.training_x)
+        distances = np.apply_along_axis(np.linalg.norm, 1, self.training_x - point)
         return distances
 
     @staticmethod
@@ -89,22 +91,12 @@ class KnnClassifier:
         classes, counts = np.unique(k_neighbors_labels, return_counts=True)
         max_count = np.max(counts)
         frequent_classes = classes[np.where(counts == max_count)]
-        # because the 'k_neighbors_labels' array is sorted with both ascending distances and ascending labels, the first
-        # occurrence of an element labeled as one of the most frequent classes in the k-neighborhood, it also satisfies
-        # all conditions in an event of a tiebreaker.
+        # because the 'k_neighbors_labels' array is sorted by both ascending distance and ascending label, the first
+        # occurrence of an element labeled as one of the most frequent classes in the k-neighborhood satisfies all
+        # conditions in an event of a tiebreaker.
         # np.argmax will return the index of the first element in 'k_neighbors_labels' which belongs to one of the
         # frequent classes.
         return k_neighbors_labels[np.argmax(np.isin(k_neighbors_labels, frequent_classes))]
-
-    @staticmethod
-    def p_norm(point, p):
-        """
-        :param point: np.array to calculate p-norm of
-        :param p: positive number
-        :return: p-norm of point ||point||_p
-        """
-        v_abs_p_pow = np.vectorize(lambda x_i: abs(x_i)**p)
-        return (np.sum(v_abs_p_pow(point)))**(1/p)
 
 
 def main():
@@ -130,15 +122,33 @@ def main():
     X = data[data.columns[:-1]].values.astype(np.float32)
     y = pd.factorize(data[data.columns[-1]])[0].astype(np.uint8)
 
+    # print("Fitting...")
+    # model.fit(X, y)
+    # print("Done")
+    # print("Predicting...")
+    # y_pred = model.predict(X)
+    # print(y_pred)
+    # print("Done")
+    # accuracy = np.sum(y_pred == y) / len(y)
+    # print(f"Train accuracy: {accuracy * 100 :.2f}%")
+    # print("*" * 20)
+
+    data_x, data_y = load_breast_cancer(return_X_y=True)
+    train_x = data_x[:300, :]
+    train_y = data_y[:300]
+    test_x = data_x[300:, :]
+    test_y = data_y[300:]
     print("Fitting...")
-    model.fit(X, y)
+    model.fit(train_x, train_y)
     print("Done")
     print("Predicting...")
-    y_pred = model.predict(X)
+    y_pred = model.predict(test_x)
+    print(y_pred)
     print("Done")
-    accuracy = np.sum(y_pred == y) / len(y)
-    print(f"Train accuracy: {accuracy * 100 :.2f}%")
+    accuracy = np.sum(y_pred == test_y) / len(test_y)
+    print(f"test accuracy: {accuracy * 100 :.2f}%")
     print("*" * 20)
+
  
 
 if __name__ == "__main__":
