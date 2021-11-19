@@ -139,7 +139,7 @@ def main():
     accuracy = np.sum(y_pred == y) / len(y)
     print(f"Train accuracy: {accuracy * 100 :.2f}%")
     print("*" * 20)
-
+ 
 
 if __name__ == "__main__":
     main()
