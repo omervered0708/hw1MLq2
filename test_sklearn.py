@@ -2,7 +2,8 @@ import argparse
 import pandas as pd
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.datasets import load_breast_cancer
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
 
 
 def main():
@@ -36,11 +37,8 @@ def main():
     # print(f"Train accuracy: {accuracy * 100 :.2f}%")
     # print("*" * 20)
 
-    data_x, data_y = load_breast_cancer(return_X_y=True)
-    train_x = data_x[:300, :]
-    train_y = data_y[:300]
-    test_x = data_x[300:, :]
-    test_y = data_y[300:]
+    data_x, data_y = load_digits(return_X_y=True)
+    train_x, test_x, train_y, test_y = train_test_split(data_x, data_y, test_size=0.25, random_state=42)
     print("Fitting...")
     model.fit(train_x, train_y)
     print("Done")

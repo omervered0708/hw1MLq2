@@ -5,7 +5,8 @@ import time
 import itertools
 import numpy as np
 import pandas as pd
-from sklearn.datasets import load_breast_cancer
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
 
 
 class KnnClassifier:
@@ -35,8 +36,6 @@ class KnnClassifier:
         """
         self.training_x = X
         self.training_y = y
-        # TODO self.sorted_index_lex might be unnecessary
-        self.sorted_index_lex = np.argsort(self.training_y)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -133,11 +132,8 @@ def main():
     # print(f"Train accuracy: {accuracy * 100 :.2f}%")
     # print("*" * 20)
 
-    data_x, data_y = load_breast_cancer(return_X_y=True)
-    train_x = data_x[:300, :]
-    train_y = data_y[:300]
-    test_x = data_x[300:, :]
-    test_y = data_y[300:]
+    data_x, data_y = load_digits(return_X_y=True)
+    train_x, test_x, train_y, test_y = train_test_split(data_x, data_y, test_size=0.25, random_state=42)
     print("Fitting...")
     model.fit(train_x, train_y)
     print("Done")
@@ -149,7 +145,6 @@ def main():
     print(f"test accuracy: {accuracy * 100 :.2f}%")
     print("*" * 20)
 
- 
 
 if __name__ == "__main__":
     main()
