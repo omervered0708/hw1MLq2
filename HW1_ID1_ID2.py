@@ -76,7 +76,7 @@ class KnnClassifier:
         :return: an array of indices of training_x sorted by distances from point
         """
         # get array containing p-distances between the given point and the points in the training set
-        distances = np.apply_along_axis(np.linalg.norm, 1, self.training_x - point)
+        distances = np.apply_along_axis(np.linalg.norm, 1, self.training_x - point, self.p)
         return distances
 
     @staticmethod
@@ -121,29 +121,29 @@ def main():
     X = data[data.columns[:-1]].values.astype(np.float32)
     y = pd.factorize(data[data.columns[-1]])[0].astype(np.uint8)
 
-    # print("Fitting...")
-    # model.fit(X, y)
-    # print("Done")
-    # print("Predicting...")
-    # y_pred = model.predict(X)
-    # print(y_pred)
-    # print("Done")
-    # accuracy = np.sum(y_pred == y) / len(y)
-    # print(f"Train accuracy: {accuracy * 100 :.2f}%")
-    # print("*" * 20)
-
-    data_x, data_y = load_digits(return_X_y=True)
-    train_x, test_x, train_y, test_y = train_test_split(data_x, data_y, test_size=0.25, random_state=42)
     print("Fitting...")
-    model.fit(train_x, train_y)
+    model.fit(X, y)
     print("Done")
     print("Predicting...")
-    y_pred = model.predict(test_x)
+    y_pred = model.predict(X)
     print(y_pred)
     print("Done")
-    accuracy = np.sum(y_pred == test_y) / len(test_y)
-    print(f"test accuracy: {accuracy * 100 :.2f}%")
+    accuracy = np.sum(y_pred == y) / len(y)
+    print(f"Train accuracy: {accuracy * 100 :.2f}%")
     print("*" * 20)
+
+    # data_x, data_y = load_digits(return_X_y=True)
+    # train_x, test_x, train_y, test_y = train_test_split(data_x, data_y, test_size=0.25, random_state=42)
+    # print("Fitting...")
+    # model.fit(train_x, train_y)
+    # print("Done")
+    # print("Predicting...")
+    # y_pred = model.predict(test_x)
+    # print(y_pred)
+    # print("Done")
+    # accuracy = np.sum(y_pred == test_y) / len(test_y)
+    # print(f"test accuracy: {accuracy * 100 :.2f}%")
+    # print("*" * 20)
 
 
 if __name__ == "__main__":
