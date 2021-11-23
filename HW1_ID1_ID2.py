@@ -60,7 +60,6 @@ class KnnClassifier:
         """
         # get array of distances between the given point and all other points in the training set
         distances = self.get_distances(test_point)
-        dist_ind_sorted = np.argsort(distances)
         # get sorted indices array - primary sort by distance, secondary sort is lexicographically by label
         sorted_indices_both = np.lexsort((self.training_y, distances))
         # get the labels according the sorted indices array
