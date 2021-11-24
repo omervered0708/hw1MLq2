@@ -5,8 +5,6 @@ import time
 import itertools
 import numpy as np
 import pandas as pd
-from sklearn.datasets import load_digits
-from sklearn.model_selection import train_test_split
 
 
 class KnnClassifier:
@@ -46,8 +44,6 @@ class KnnClassifier:
             Array datatype is guaranteed to be np.float32.
         :return: A 1-dimensional numpy array of m rows. Should be of datatype np.uint8.
         """
-        # get vectorized version of predict single to use on the given array
-        # v_predict_single = np.vectorize(self.predict_single)
         # map the predict_single function onto X to get prediction vector
         predictions = np.apply_along_axis(self.predict_single, 1, X)
         return predictions
@@ -60,7 +56,6 @@ class KnnClassifier:
         """
         # get array of distances between the given point and all other points in the training set
         distances = self.get_distances(test_point)
-        dist_ind_sorted = np.argsort(distances)
         # get sorted indices array - primary sort by distance, secondary sort is lexicographically by label
         sorted_indices_both = np.lexsort((self.training_y, distances))
         # get the labels according the sorted indices array
@@ -126,24 +121,10 @@ def main():
     print("Done")
     print("Predicting...")
     y_pred = model.predict(X)
-    print(y_pred)
     print("Done")
     accuracy = np.sum(y_pred == y) / len(y)
     print(f"Train accuracy: {accuracy * 100 :.2f}%")
     print("*" * 20)
-
-    # data_x, data_y = load_digits(return_X_y=True)
-    # train_x, test_x, train_y, test_y = train_test_split(data_x, data_y, test_size=0.25, random_state=42)
-    # print("Fitting...")
-    # model.fit(train_x, train_y)
-    # print("Done")
-    # print("Predicting...")
-    # y_pred = model.predict(test_x)
-    # print(y_pred)
-    # print("Done")
-    # accuracy = np.sum(y_pred == test_y) / len(test_y)
-    # print(f"test accuracy: {accuracy * 100 :.2f}%")
-    # print("*" * 20)
 
 
 if __name__ == "__main__":
